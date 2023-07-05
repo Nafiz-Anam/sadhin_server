@@ -441,55 +441,6 @@ var AuthController = {
             });
         }
     },
-
-    // login: async (req, res) => {
-    //     try {
-    //         let foundUser = await UserModel.select({
-    //             mobile_code: req.bodyString("mobile_code"),
-    //             mobile_no: req.bodyString("mobile_no"),
-    //             deleted: 0,
-    //         });
-
-    //         if (foundUser.length > 0) {
-    //             let submittedPass = req.bodyString("password");
-    //             let plainPassword = await enc_dec.decrypt(
-    //                 foundUser[0].password
-    //             );
-
-    //             if (submittedPass === plainPassword) {
-    //                 payload = {
-    //                     id: foundUser[0].id,
-    //                     type: foundUser[0].type,
-    //                 };
-    //                 const token = accessToken(payload);
-
-    //                 res.status(200).json({
-    //                     status: true,
-    //                     token: token,
-    //                     message: "User logged in successfully!",
-    //                 });
-    //             } else {
-    //                 res.status(500).json({
-    //                     status: false,
-    //                     data: {},
-    //                     error: "Wrong Password!",
-    //                 });
-    //             }
-    //         } else {
-    //             res.status(500).json({
-    //                 status: false,
-    //                 data: {},
-    //                 error: "User not exists!",
-    //             });
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //         res.status(500).json({
-    //             status: false,
-    //             message: "Internal server error!",
-    //         });
-    //     }
-    // },
 };
 
 module.exports = AuthController;

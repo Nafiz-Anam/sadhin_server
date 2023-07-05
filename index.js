@@ -19,7 +19,7 @@ app.use("/api/v1", Router);
 
 
 app.get("/", (req, res) => {
-    res.send("Quick Cash API");
+    res.send("Welcome to Sadhin App server");
 });
 
 app.listen(port, () => {

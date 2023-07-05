@@ -26,7 +26,6 @@ router.post(
 router.post(
     "/transactions",
     checkUserToken,
-    // accountValidation.mobile_recharge,
     accountController.transactions
 );
 
