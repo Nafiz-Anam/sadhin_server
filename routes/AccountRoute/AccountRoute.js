@@ -23,5 +23,11 @@ router.post(
     accountValidation.mobile_recharge,
     accountController.mobile_recharge
 );
+router.post(
+    "/transactions",
+    checkUserToken,
+    // accountValidation.mobile_recharge,
+    accountController.transactions
+);
 
 module.exports = router;
