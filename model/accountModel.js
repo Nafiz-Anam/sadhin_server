@@ -4,6 +4,7 @@ const config = require("../config/config.json")[env];
 const pool = require("../config/database");
 const dbtable = config.table_prefix + "add_money";
 const send_money = config.table_prefix + "send_money";
+const mobile_recharge = config.table_prefix + "mobile_recharge";
 const profile_table = config.table_prefix + "user_details";
 const review_table = config.table_prefix + "reviews";
 const helpers = require("../utilities/helper/general_helper");
@@ -18,6 +19,12 @@ var dbModel = {
     add_send_money_req: async (data) => {
         let qb = await pool.get_connection();
         let response = await qb.returning("id").insert(send_money, data);
+        qb.release();
+        return response;
+    },
+    add_mobile_recharge_req: async (data) => {
+        let qb = await pool.get_connection();
+        let response = await qb.returning("id").insert(mobile_recharge, data);
         qb.release();
         return response;
     },

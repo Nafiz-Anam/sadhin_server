@@ -186,56 +186,35 @@ var AccountController = {
         }
     },
 
-    list_reviews: async (req, res) => {
+    mobile_recharge: async (req, res) => {
+        let user_id = req.user.id;
         try {
-            let limit = {
-                perpage: 10,
-                start: 0,
+            let data = {
+                user_id: user_id,
+                operator_type: req.bodyString("operator_type"),
+                operator: req.bodyString("operator"),
+                mobile_no: req.bodyString("mobile_no"),
+                amount: req.bodyString("amount"),
             };
-            if (req.bodyString("perpage") && req.bodyString("page")) {
-                perpage = parseInt(req.bodyString("perpage"));
-                start = parseInt(req.bodyString("page"));
-                limit.perpage = perpage;
-                limit.start = (start - 1) * perpage;
-            }
-
-            UserModel.select_review_list(limit)
-                .then(async (result) => {
-                    let response = [];
-                    for (val of result) {
-                        temp = {
-                            id: val?.id ? await enc_dec.encrypt(val?.id) : "",
-                            user_id: val?.user_id
-                                ? await enc_dec.encrypt(val?.user_id)
-                                : "",
-                            start_count: val?.start_count
-                                ? val?.start_count
-                                : 0,
-                            review: val?.review ? val?.review : "",
-                            created_at: val?.created_at ? val?.created_at : "",
-                        };
-                        response.push(temp);
-                    }
+            await AccountModel.add_mobile_recharge_req(data)
+                .then((result) => {
                     res.status(200).json({
                         status: true,
-                        data: response,
-                        message: "Reviews fetched successfully!",
+                        message: "Mobile recharge request sent successfully!",
                     });
                 })
                 .catch((err) => {
                     console.log(err);
                     res.status(500).json({
                         status: false,
-                        data: {},
-                        error: "Server side error!",
+                        message: "Unable to send request. Try again!",
                     });
                 });
         } catch (error) {
             console.log(error);
             res.status(500).json({
                 status: false,
-                data: {},
-                error: "Server side error!",
+                message: "Server side error! Try again.",
             });
         }
     },
