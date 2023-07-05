@@ -40,6 +40,80 @@ const accountValidation = {
         }
     },
 
+    send_money: async (req, res, next) => {
+        const schema = Joi.object({
+            mobile_no: Joi.string().required().min(11).messages({
+                "any.required": "Mobile number is required",
+                "string.min":
+                    "Mobile number must be at least 11 characters long",
+                "string.empty": "Mobile number cannot be empty",
+            }),
+            amount: Joi.string()
+                .pattern(/^[0-9]+$/)
+                .required()
+                .messages({
+                    "any.required": "Amount is required",
+                    "string.empty": "Amount cannot be empty",
+                    "string.pattern.base": "Amount must be a valid number",
+                }),
+            commission: Joi.string()
+                .pattern(/^[0-9]+$/)
+                .required()
+                .messages({
+                    "any.required": "Amount is required",
+                    "string.empty": "Amount cannot be empty",
+                    "string.pattern.base": "Amount must be a valid number",
+                }),
+            pin: Joi.string().required().length(4).pattern(/^\d+$/).messages({
+                "any.required": "PIN is required",
+                "string.base": "PIN must be a string",
+                "string.empty": "PIN cannot be empty",
+                "string.length": "PIN must be exactly 4 characters long",
+                "string.pattern.base": "PIN must contain only digits",
+            }),
+        });
+        try {
+            const result = schema.validate(req.body);
+            let mobile_no = req.bodyString("mobile_no");
+            const lastTen = mobile_no.substr(-10);
+            let user = await helpers.get_data_list("id", "users", {
+                mobile_no: lastTen,
+                deleted: 0,
+            });
+            console.log(user);
+            let pin = await helpers.get_data_list("id", "users", {
+                mobile_no: lastTen,
+                pin: req.bodyString("pin"),
+                deleted: 0,
+            });
+            console.log(pin);
+
+            if (result.error) {
+                res.status(503).json({
+                    status: false,
+                    error: result.error.message,
+                });
+            } else if (!user.length > 0) {
+                res.status(503).json({
+                    status: false,
+                    error: "User not found!",
+                });
+            } else if (!pin.length > 0) {
+                res.status(503).json({
+                    status: false,
+                    error: "Incorrect PIN number!",
+                });
+            } else {
+                next();
+            }
+        } catch (error) {
+            res.status(503).json({
+                status: false,
+                error: "Server side error!",
+            });
+        }
+    },
+
     check_user: async (req, res, next) => {
         const schema = Joi.object({
             mobile_code: Joi.string().required().min(3).messages({

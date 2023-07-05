@@ -118,7 +118,7 @@ var AccountController = {
                 user_id: user_id,
                 amount: req.bodyString("amount"),
                 method: req.bodyString("method"),
-                account_id: enc_dec.decrypt(req.bodyString("account_id")) ,
+                account_id: enc_dec.decrypt(req.bodyString("account_id")),
                 transaction_id: req.bodyString("transaction_id"),
                 receipt_img: req.all_files.receipt_img,
             };
@@ -127,6 +127,47 @@ var AccountController = {
                     res.status(200).json({
                         status: true,
                         message: "Add money request sent successfully!",
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(500).json({
+                        status: false,
+                        message: "Unable to send request. Try again!",
+                    });
+                });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: "Server side error! Try again.",
+            });
+        }
+    },
+
+    send_money: async (req, res) => {
+        let user_id = req.user.id;
+        try {
+            let mobile_no = req.bodyString("mobile_no");
+            const lastTen = mobile_no.substr(-10);
+            let user = await helpers.get_data_list("id", "users", {
+                mobile_no: lastTen,
+                deleted: 0,
+            });
+            console.log(user);
+
+            let data = {
+                user_id: user_id,
+                sent_user_id: user[0]?.id,
+                mobile_no: req.bodyString("mobile_no"),
+                amount: req.bodyString("amount"),
+                commission: req.bodyString("commission"),
+            };
+            await AccountModel.add_send_money_req(data)
+                .then((result) => {
+                    res.status(200).json({
+                        status: true,
+                        message: "Send money request sent successfully!",
                     });
                 })
                 .catch((err) => {

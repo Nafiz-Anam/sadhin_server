@@ -11,5 +11,11 @@ router.post(
     accountValidation.add_money,
     accountController.add_money
 );
+router.post(
+    "/send_money",
+    checkUserToken,
+    accountValidation.send_money,
+    accountController.send_money
+);
 
 module.exports = router;

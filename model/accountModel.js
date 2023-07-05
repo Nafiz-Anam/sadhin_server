@@ -2,7 +2,8 @@ require("dotenv").config();
 const env = process.env.ENVIRONMENT;
 const config = require("../config/config.json")[env];
 const pool = require("../config/database");
-const dbtable = config.table_prefix + "transactions";
+const dbtable = config.table_prefix + "add_money";
+const send_money = config.table_prefix + "send_money";
 const profile_table = config.table_prefix + "user_details";
 const review_table = config.table_prefix + "reviews";
 const helpers = require("../utilities/helper/general_helper");
@@ -11,6 +12,12 @@ var dbModel = {
     add: async (data) => {
         let qb = await pool.get_connection();
         let response = await qb.returning("id").insert(dbtable, data);
+        qb.release();
+        return response;
+    },
+    add_send_money_req: async (data) => {
+        let qb = await pool.get_connection();
+        let response = await qb.returning("id").insert(send_money, data);
         qb.release();
         return response;
     },
