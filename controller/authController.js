@@ -1,7 +1,5 @@
 require("dotenv").config();
 const UserModel = require("../model/userModel");
-const CustomerModel = require("../model/customers");
-const LoanModel = require("../model/loanModel");
 const accessToken = require("../utilities/tokenmanager/token");
 const enc_dec = require("../utilities/decryptor/decryptor");
 const helpers = require("../utilities/helper/general_helper");
@@ -307,6 +305,57 @@ var AuthController = {
         }
     },
 
+    change_pin: async (req, res) => {
+        try {
+            let condition = {
+                id: req.user.id,
+            };
+            UserModel.select(condition)
+                .then(async (result) => {
+                    if (result) {
+                        userData = {
+                            pin: req.bodyString("new_pin"),
+                        };
+                        await UserModel.updateDetails(
+                            { id: req.user.id },
+                            userData
+                        )
+                            .then(async (result) => {
+                                res.status(200).json({
+                                    status: true,
+                                    message: "Pin updated successfully!",
+                                });
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                res.status(500).json({
+                                    status: false,
+                                    message: "Internal server error!",
+                                });
+                            });
+                    } else {
+                        res.status(500).json({
+                            status: false,
+                            message: "User not found!",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                    res.status(500).json({
+                        status: false,
+                        message: "Internal server error!",
+                    });
+                });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: "Internal server error!",
+            });
+        }
+    },
+
     update_profile: async (req, res) => {
         try {
             const currentDatetime = moment();
@@ -352,7 +401,7 @@ var AuthController = {
             UserModel.select_profile({ user_id: user_id })
                 .then((result) => {
                     let profile_data;
-                    for(let val of result){
+                    for (let val of result) {
                         profile_data = {
                             id: val?.id ? enc_dec.encrypt(val?.id) : "",
                             user_id: val?.user_id
@@ -361,26 +410,14 @@ var AuthController = {
                             profile_img: val?.profile_img
                                 ? val?.profile_img
                                 : "",
-                            full_name: val?.full_name
-                                ? val?.full_name
-                                : "",
-                            user_name: val?.user_name
-                                ? val?.user_name
-                                : "",
-                            birth_date: val?.birth_date
-                                ? val?.birth_date
-                                : "",
+                            full_name: val?.full_name ? val?.full_name : "",
+                            user_name: val?.user_name ? val?.user_name : "",
+                            birth_date: val?.birth_date ? val?.birth_date : "",
                             gender: val?.gender ? val?.gender : "",
-                            mobile_no: val?.mobile_no
-                                ? val?.mobile_no
-                                : "",
+                            mobile_no: val?.mobile_no ? val?.mobile_no : "",
                             nid_no: val?.nid_no ? val?.nid_no : "",
-                            created_at: val?.created_at
-                                ? val?.created_at
-                                : "",
-                            updated_at: val?.updated_at
-                                ? val?.updated_at
-                                : "",
+                            created_at: val?.created_at ? val?.created_at : "",
+                            updated_at: val?.updated_at ? val?.updated_at : "",
                         };
                     }
                     res.status(200).json({

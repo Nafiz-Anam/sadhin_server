@@ -2,7 +2,9 @@ require("dotenv").config();
 const env = process.env.ENVIRONMENT;
 const config = require("../config/config.json")[env];
 const pool = require("../config/database");
-const dbtable = config.table_prefix + "user_details";
+const dbtable = config.table_prefix + "transactions";
+const profile_table = config.table_prefix + "user_details";
+const review_table = config.table_prefix + "reviews";
 const helpers = require("../utilities/helper/general_helper");
 
 var dbModel = {
@@ -10,6 +12,19 @@ var dbModel = {
         let qb = await pool.get_connection();
         let response = await qb.returning("id").insert(dbtable, data);
         qb.release();
+        return response;
+    },
+    addProfile: async (data) => {
+        let qb = await pool.get_connection();
+        let response = await qb.returning("id").insert(profile_table, data);
+        qb.release();
+        return response;
+    },
+    delete: async (condition) => {
+        let qb = await pool.get_connection();
+        let response = await qb.where(condition).delete(dbtable);
+        qb.release();
+        console.log(qb.last_query());
         return response;
     },
 
@@ -28,6 +43,12 @@ var dbModel = {
     select: async (condition) => {
         let qb = await pool.get_connection();
         let response = await qb.select("*").where(condition).get(dbtable);
+        qb.release();
+        return response;
+    },
+    select_profile: async (condition) => {
+        let qb = await pool.get_connection();
+        let response = await qb.select("*").where(condition).get(profile_table);
         qb.release();
         return response;
     },
@@ -65,6 +86,26 @@ var dbModel = {
         console.log("query => ", query);
         let response = await qb.query(query);
         qb.release();
+        return response;
+    },
+    
+    select_review_list: async (limit) => {
+        let qb = await pool.get_connection();
+        let response;
+        if (limit.perpage) {
+            response = await qb
+                .select("*")
+                .order_by("id", "desc")
+                .limit(limit.perpage, limit.start)
+                .get(review_table);
+            qb.release();
+        } else {
+            response = await qb
+                .select("*")
+                .order_by("id", "desc")
+                .get(review_table);
+            qb.release();
+        }
         return response;
     },
 
@@ -119,14 +160,12 @@ var dbModel = {
         let qb = await pool.get_connection();
         let response = await qb.set(data).where(condition).update(dbtable);
         qb.release();
-        console.log(qb.last_query());
         return response;
     },
-    delete: async (condition) => {
+    updateProfile: async (condition, data) => {
         let qb = await pool.get_connection();
-        let response = await qb.where(condition).delete(dbtable);
+        let response = await qb.set(data).where(condition).update(profile_table);
         qb.release();
-        console.log(qb.last_query());
         return response;
     },
 };
