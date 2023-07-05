@@ -77,6 +77,79 @@ var AuthController = {
         }
     },
 
+    resend_otp: async (req, res) => {
+        const { mobile_code, mobile_no } = req.body;
+        try {
+            let otp = await helpers.generateOtp(6);
+            const title = "Sadhin Pay";
+            const mobile_number = `${mobile_code}${mobile_no}`;
+
+            const welcomeMessage =
+                "Welcome to " +
+                title +
+                "! Your verification code is: " +
+                otp +
+                ". Do not share it with anyone.";
+
+            console.log("mobile_number", mobile_number);
+            console.log("welcomeMessage", welcomeMessage);
+
+            await otpSender(mobile_number, welcomeMessage)
+                .then(async (data) => {
+                    console.log("sms res =>", data);
+                    // delete old OTP entry from table
+                    let condition = {
+                        mobile_code: mobile_code,
+                        mobile_no: mobile_no,
+                    };
+                    await helpers.delete_common_entry(condition, "mobile_otp");
+
+                    // adding new otp entry
+                    const uuid = new SequenceUUID({
+                        valid: true,
+                        dashes: true,
+                        unsafeBuffer: true,
+                    });
+                    let token = uuid.generate();
+                    let ins_data = {
+                        mobile_code: mobile_code,
+                        mobile_no: mobile_no,
+                        otp: otp,
+                        token: token,
+                        sms_id: data,
+                    };
+                    CustomerModel.addMobileOTP(ins_data)
+                        .then(async (result) => {
+                            res.status(200).json({
+                                status: true,
+                                token: token,
+                                message: "Otp sent on your mobile number",
+                            });
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                            res.status(500).json({
+                                status: false,
+                                message: error.message,
+                            });
+                        });
+                })
+                .catch((error) => {
+                    console.log(error);
+                    res.status(500).json({
+                        status: false,
+                        message: error.message,
+                    });
+                });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: error.message,
+            });
+        }
+    },
+
     otp_verify: async (req, res) => {
         try {
             let selection = "id,mobile_code,mobile_no,sms_id";
@@ -255,6 +328,65 @@ var AuthController = {
                     res.status(200).json({
                         status: true,
                         message: "Profile updated successfully!",
+                    });
+                })
+                .catch((error) => {
+                    console.log(error);
+                    res.status(500).json({
+                        status: false,
+                        message: "Internal server error!",
+                    });
+                });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: "Internal server error!",
+            });
+        }
+    },
+
+    profile_details: async (req, res) => {
+        try {
+            let user_id = req.user.id;
+            UserModel.select_profile({ user_id: user_id })
+                .then((result) => {
+                    let profile_data;
+                    for(let val of result){
+                        profile_data = {
+                            id: val?.id ? enc_dec.encrypt(val?.id) : "",
+                            user_id: val?.user_id
+                                ? enc_dec.encrypt(val?.user_id)
+                                : "",
+                            profile_img: val?.profile_img
+                                ? val?.profile_img
+                                : "",
+                            full_name: val?.full_name
+                                ? val?.full_name
+                                : "",
+                            user_name: val?.user_name
+                                ? val?.user_name
+                                : "",
+                            birth_date: val?.birth_date
+                                ? val?.birth_date
+                                : "",
+                            gender: val?.gender ? val?.gender : "",
+                            mobile_no: val?.mobile_no
+                                ? val?.mobile_no
+                                : "",
+                            nid_no: val?.nid_no ? val?.nid_no : "",
+                            created_at: val?.created_at
+                                ? val?.created_at
+                                : "",
+                            updated_at: val?.updated_at
+                                ? val?.updated_at
+                                : "",
+                        };
+                    }
+                    res.status(200).json({
+                        status: true,
+                        data: profile_data,
+                        message: "Profile fetched successfully!",
                     });
                 })
                 .catch((error) => {
