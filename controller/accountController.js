@@ -204,6 +204,48 @@ var AccountController = {
             });
         }
     },
+
+    kyc_validation: async (req, res) => {
+        let user_id = req.user.id;
+        try {
+            let kyc_data = {
+                user_id: user_id,
+                full_name: req.bodyString("full_name"),
+                father_name: req.bodyString("father_name"),
+                mother_name: req.bodyString("mother_name"),
+                birth_date: req.bodyString("birth_date"),
+                nid_no: req.bodyString("nid_no"),
+                blood_group: req.bodyString("blood_group"),
+                gender: req.bodyString("gender"),
+                source_of_fund: req.bodyString("source_of_fund"),
+                monthly_income: req.bodyString("monthly_income"),
+                occupation: req.bodyString("occupation"),
+                nid_front_img: req.all_files.nid_front_img,
+                nid_back_img: req.all_files.nid_back_img,
+                user_img: req.all_files.user_img,
+            };
+            await AccountModel.add_kyc(kyc_data)
+                .then((result) => {
+                    res.status(200).json({
+                        status: true,
+                        message: "KYC validation request submitted successfully!",
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(500).json({
+                        status: false,
+                        message: "Unable to submit request. Try again!",
+                    });
+                });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                status: false,
+                message: "Server side error! Try again.",
+            });
+        }
+    },
 };
 
 module.exports = AccountController;

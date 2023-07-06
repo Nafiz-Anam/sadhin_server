@@ -178,6 +178,78 @@ const accountValidation = {
         }
     },
 
+    kyc_validation: async (req, res, next) => {
+        const kycDataSchema = Joi.object({
+            full_name: Joi.string().required().messages({
+                "any.required": "Full name is required.",
+                "string.empty": "Full name must not be empty.",
+            }),
+            father_name: Joi.string().required().messages({
+                "any.required": "Father's name is required.",
+                "string.empty": "Father's name must not be empty.",
+            }),
+            mother_name: Joi.string().required().messages({
+                "any.required": "Mother's name is required.",
+                "string.empty": "Mother's name must not be empty.",
+            }),
+            birth_date: Joi.string().required().isoDate().messages({
+                "any.required": "Birth date is required.",
+                "string.empty": "Birth date must not be empty.",
+                "string.isoDate":
+                    "Birth date must be a valid date in ISO format.",
+            }),
+            nid_no: Joi.string().alphanum().length(10).required().messages({
+                "any.required": "NID number is required.",
+                "string.empty": "NID number must not be empty.",
+                "string.alphanum":
+                    "NID number must contain only alphanumeric characters.",
+                "string.length":
+                    "NID number must be exactly 10 characters long.",
+            }),
+            blood_group: Joi.string()
+                .valid("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
+                .required()
+                .messages({
+                    "any.required": "Blood group is required.",
+                    "string.empty": "Blood group must not be empty.",
+                    "any.only":
+                        "Blood group must be one of the valid types (A+, A-, B+, B-, AB+, AB-, O+, O-).",
+                }),
+            gender: Joi.string().valid("male", "female").required().messages({
+                "any.required": "Gender is required.",
+                "string.empty": "Gender must not be empty.",
+                "any.only":
+                    "Gender must be one of the valid types (Male, Female, Other).",
+            }),
+            source_of_fund: Joi.string().required().messages({
+                "any.required": "Source of fund is required.",
+                "string.empty": "Source of fund must not be empty.",
+            }),
+            monthly_income: Joi.string().required().messages({
+                "any.required": "Monthly income is required.",
+            }),
+            occupation: Joi.string().required().messages({
+                "any.required": "Occupation is required.",
+            }),
+        });
+
+        try {
+            const result = kycDataSchema.validate(req.body);
+            if (result.error) {
+                res.status(503).json({
+                    status: false,
+                    error: result.error.message,
+                });
+            } else {
+                next();
+            }
+        } catch (error) {
+            res.status(503).json({
+                status: false,
+                error: "Server side error!",
+            });
+        }
+    },
 };
 
 module.exports = accountValidation;

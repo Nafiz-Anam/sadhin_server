@@ -3,6 +3,7 @@ const env = process.env.ENVIRONMENT;
 const config = require("../config/config.json")[env];
 const pool = require("../config/database");
 const dbtable = config.table_prefix + "add_money";
+const user_kyc = config.table_prefix + "user_kyc";
 const send_money = config.table_prefix + "send_money";
 const mobile_recharge = config.table_prefix + "mobile_recharge";
 const profile_table = config.table_prefix + "user_details";
@@ -13,6 +14,12 @@ var dbModel = {
     add: async (data) => {
         let qb = await pool.get_connection();
         let response = await qb.returning("id").insert(dbtable, data);
+        qb.release();
+        return response;
+    },
+    add_kyc: async (data) => {
+        let qb = await pool.get_connection();
+        let response = await qb.returning("id").insert(user_kyc, data);
         qb.release();
         return response;
     },

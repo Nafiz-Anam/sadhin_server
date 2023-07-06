@@ -1,5 +1,6 @@
 require("dotenv").config();
 const UserModel = require("../model/userModel");
+const CustomerModel = require("../model/customers");
 const accessToken = require("../utilities/tokenmanager/token");
 const enc_dec = require("../utilities/decryptor/decryptor");
 const helpers = require("../utilities/helper/general_helper");

@@ -3,6 +3,7 @@ const accountController = require("../../controller/accountController");
 const accountValidation = require("../../utilities/validations/accountValidation");
 const checkUserToken = require("../../utilities/tokenmanager/checkUserToken");
 const receiptUpload = require("../../uploads/receiptUpload");
+const KycUpload = require("../../uploads/kyc_uploader");
 
 router.post(
     "/add_money",
@@ -23,10 +24,13 @@ router.post(
     accountValidation.mobile_recharge,
     accountController.mobile_recharge
 );
+router.post("/transactions", checkUserToken, accountController.transactions);
 router.post(
-    "/transactions",
+    "/kyc_validation",
     checkUserToken,
-    accountController.transactions
+    KycUpload,
+    accountValidation.kyc_validation,
+    accountController.kyc_validation
 );
 
 module.exports = router;
